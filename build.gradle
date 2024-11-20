@@ -28,6 +28,7 @@ buildscript {
 
 plugins {
     id("net.ltgt.errorprone") version "0.8.1" apply false
+    id 'maven-publish'
 }
 
 apply(plugin: "java");
@@ -69,6 +70,19 @@ repositories {
 /*
  * Add errorprone checking.
  */
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        mavenLocal() // Publishes to the local Maven repository
+    }
+}
+
+
 dependencies {
     errorprone("com.google.errorprone:error_prone_core:2.3.3")
     errorproneJavac("com.google.errorprone:javac:9+181-r4173-1")

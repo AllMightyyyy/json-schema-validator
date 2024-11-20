@@ -179,6 +179,52 @@ public final class ValidationProcessorTest
         assertTrue(true);
     }
 
+    /**
+     * Test that validation messages are correctly loaded in Spanish
+     */
+    @Test
+    public void validationMessagesAreInSpanish()
+            throws ProcessingException, IOException {
+        // Step 1: Set up the validation configuration with Spanish language
+        final Keyword keyword = Keyword.newBuilder(K1)
+                .withSyntaxChecker(mock(SyntaxChecker.class))
+                .withIdentityDigester(NodeType.ARRAY, NodeType.values())
+                .withValidatorClass(K1Validator.class)
+                .freeze();
+        final Library library = DraftV4Library.get().thaw()
+                .addKeyword(keyword).freeze();
+
+        // Configure with Spanish language
+        final ValidationConfiguration cfg = ValidationConfiguration.newBuilder()
+                .setLanguage("es") // Set language to Spanish
+                .setDefaultLibrary("foo://bar#", library)
+                .freeze();
+
+        final JsonSchemaFactory factory = JsonSchemaFactory.newBuilder()
+                .setValidationConfiguration(cfg).freeze();
+        final JsonValidator validator = factory.getValidator();
+
+        // Step 2: Define a schema that requires at least 2 items
+        final ObjectNode schemaNode = (ObjectNode) JsonLoader.fromString("{ \"minItems\": 2 }");
+
+        // Step 3: Define an instance that violates the schema (only 1 item)
+        final ArrayNode instanceNode = (ArrayNode) JsonLoader.fromString("[1]");
+
+        // Step 4: Perform validation
+        final ProcessingReport report = validator.validate(schemaNode, instanceNode);
+
+        // Step 5: Assert that validation failed
+        assertTrue(report.isSuccess() == false, "Validation should fail due to minItems");
+
+        // Step 6: Retrieve the validation message and check it's in Spanish
+        for (ProcessingMessage message : report) {
+            String msg = message.getMessage();
+            // Example expected message in Spanish
+            String expectedMessage = "El array es demasiado corto: debe tener al menos 2 elementos, pero la instancia tiene 1 elementos";
+            assertEquals(msg, expectedMessage, "Validation message should be in Spanish");
+        }
+    }
+
     public static final class K1Validator
         extends AbstractKeywordValidator
     {

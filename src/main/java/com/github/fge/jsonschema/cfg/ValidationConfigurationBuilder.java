@@ -34,6 +34,8 @@ import com.github.fge.msgsimple.bundle.MessageBundle;
 import com.github.fge.msgsimple.load.MessageBundles;
 import com.google.common.collect.Maps;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -95,6 +97,12 @@ public final class ValidationConfigurationBuilder
      * The set of validation messages
      */
     MessageBundle validationMessages;
+
+    /**
+     * The language code for validation messages (e.g., "en", "es")
+     * default to english
+     */
+    private String languageCode = "en";
 
     ValidationConfigurationBuilder()
     {
@@ -232,6 +240,22 @@ public final class ValidationConfigurationBuilder
     }
 
     /**
+     * Set the language for validation messages
+     *
+     * @param languageCode the ISO language code (e.g., "en", "es", "fr")
+     * @return this
+     */
+    public ValidationConfigurationBuilder setLanguage(String languageCode) {
+        List<String> supportedLanguages = Arrays.asList("en", "es", "fr", "de");
+        if (!supportedLanguages.contains(languageCode)) {
+            throw new IllegalArgumentException("Unsupported language code: " + languageCode);
+        }
+        this.languageCode = languageCode;
+        return this;
+    }
+
+
+    /**
      * Return a frozen version of this configuration
      *
      * @return a {@link ValidationConfiguration}
@@ -240,6 +264,8 @@ public final class ValidationConfigurationBuilder
     @Override
     public ValidationConfiguration freeze()
     {
+        this.validationMessages = new JsonSchemaValidationBundle(languageCode).getBundle();
+
         return new ValidationConfiguration(this);
     }
 }

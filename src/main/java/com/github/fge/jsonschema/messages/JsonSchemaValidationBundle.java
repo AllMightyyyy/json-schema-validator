@@ -26,12 +26,20 @@ import com.github.fge.msgsimple.load.MessageBundleLoader;
 public final class JsonSchemaValidationBundle
     implements MessageBundleLoader
 {
-    private static final String PATH
-        = "com/github/fge/jsonschema/validator/validation.properties";
+    private final String languageCode;
+
+    public JsonSchemaValidationBundle() {
+        this.languageCode = "en";
+    }
+
+    public JsonSchemaValidationBundle(String languageCode) {
+        this.languageCode = languageCode;
+    }
 
     @Override
     public MessageBundle getBundle()
     {
-        return PropertiesBundle.forPath(PATH);
+        String path = String.format("com/github/fge/jsonschema/validator/validation_%s.properties", languageCode);
+        return PropertiesBundle.forPath(path);
     }
 }
